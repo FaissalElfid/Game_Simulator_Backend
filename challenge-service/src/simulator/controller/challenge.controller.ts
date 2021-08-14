@@ -9,6 +9,7 @@ import {
   import {MessagePattern, Payload} from "@nestjs/microservices";
   import {IKafkaMessage} from "../../interfaces/kafka-message.interface";
   import {IChallenge} from '../interface/challenge.interface';
+import { IChallengeId } from '../interface/challengeId.interface';
   import { ChallengeService } from '../service/challenge.service';
   
   @Controller('challenges')
@@ -27,25 +28,20 @@ import {
     getAllChallenge() {
       return this.challengeService.getChallenges();
     }
-  
-    @Get(':id')
-    getChallenge(@Param('id') prodId: string) {
-      return this.challengeService.getSingleChallenge(prodId);
+
+    // also add the api path on the api-gateway
+    @MessagePattern('getById.challenge')
+    getChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
+      return this.challengeService.getSingleChallenge(messageKafka.value);
+      // return this.challengeService.getSingleChallenge(messageKafka.value.id);
     }
-  
-    @Patch(':id')
-    async updateChallenge(
-      @Param('id') prodId: string,
-      @Body('title') prodTitle: string,
-      @Body('description') prodDesc: string,
-    ) {
-      await this.challengeService.updateChallenge(prodId, prodTitle, prodDesc);
-      return null;
+
+    @MessagePattern('updateById.challenge')
+    async updateChallenge(@Payload() messageKafka: IKafkaMessage<IChallengeId>) {
+      return this.challengeService.updateChallenge(messageKafka.value.id, messageKafka.value.title, messageKafka.value.description);
     }
-  
-    @Delete(':id')
-    async removeChallenge(@Param('id') prodId: string) {
-        await this.challengeService.deleteChallenge(prodId);
-        return null;
+    @MessagePattern('deleteById.challenge')
+    async removeChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
+        return this.challengeService.deleteChallenge(messageKafka.value);
     }
   }

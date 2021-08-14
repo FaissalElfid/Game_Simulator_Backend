@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ChallengesController } from './posts/posts.controller';
+import { ChallengesController } from './challenges/challengesType.controller';
 
 @Module({
   imports: [],
