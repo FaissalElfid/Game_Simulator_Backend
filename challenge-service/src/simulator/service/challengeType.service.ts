@@ -2,25 +2,25 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Challenge } from '../model/challenge.model';
+import { ChallengeType } from '../model/ChallengeType.model';
 
 @Injectable()
-export class ChallengeService {
+export class ChallengeTypeService {
   constructor(
-    @InjectModel('Challenge') private readonly challengeModel: Model<Challenge>,
+    @InjectModel('ChallengeType') private readonly challengeTypeModel: Model<ChallengeType>,
   ) {}
 
-  async insertChallenge(title: string, desc: string) {
-    const newChallenge = new this.challengeModel({
+  async insertChallengeType(title: string, desc: string) {
+    const newChallengeType = new this.challengeTypeModel({
       title,
       description: desc,
     });
-    const result = await newChallenge.save();
+    const result = await newChallengeType.save();
     return result.id as string;
   }
 
-  async getChallenges() {
-    const challenges = await this.challengeModel.find().exec();
+  async getChallengeTypes() {
+    const challenges = await this.challengeTypeModel.find().exec();
     return challenges.map(prod => ({
       id: prod.id,
       title: prod.title,
@@ -53,16 +53,16 @@ export class ChallengeService {
   }
 
   async deleteChallenge(prodId: string) {
-    const result = await this.challengeModel.deleteOne({_id: prodId}).exec();
+    const result = await this.challengeTypeModel.deleteOne({_id: prodId}).exec();
     if (result.n === 0) {
       throw new NotFoundException('Could not find challenge.');
     }
   }
 
-  private async findChallenge(id: string): Promise<Challenge> {
+  private async findChallenge(id: string): Promise<ChallengeType> {
     let challenge;
     try {
-      challenge = await this.challengeModel.findById(id).exec();
+      challenge = await this.challengeTypeModel.findById(id).exec();
     } catch (error) {
       throw new NotFoundException('Could not find challenge.');
     }
