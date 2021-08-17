@@ -3,11 +3,10 @@ import {
   } from '@nestjs/common';
   import {MessagePattern, Payload} from "@nestjs/microservices";
   import {IKafkaMessage} from "../../interfaces/kafka-message.interface";
-  import {IChallenge} from '../interface/challenge.interface';
-import { IChallengeId } from '../interface/challengeId.interface';
+import { IChallengeId, IChallenge } from '../interface/challengeType.interface';
   import { ChallengeTypeService } from '../service/challengeType.service';
   
-@Controller('challengeType')
+@Controller('challengeTypes')
   export class ChallengeTypeController {
     constructor(private readonly challengeTypeService: ChallengeTypeService) {}
     @MessagePattern('add.new.challengeType')

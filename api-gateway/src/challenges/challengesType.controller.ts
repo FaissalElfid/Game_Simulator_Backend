@@ -1,32 +1,19 @@
-import { Delete, Patch, Put } from '@nestjs/common';
+import { Delete, Patch, Put,Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { Client, ClientKafka, Transport } from '@nestjs/microservices';
+import { Client, ClientKafka } from '@nestjs/microservices';
 import { Challenge } from './interfaces/challenge.interface';
 
 @Controller('challengetype')
-export class ChallengesController {
-  @Client({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        clientId: 'challenges',
-        brokers: ['localhost:9092'],
-      },
-      consumer: {
-        groupId: 'challenges-consumer',
-      },
-    },
-  })
-  client: ClientKafka;
-
+export class ChallengesController  implements OnModuleInit, OnModuleDestroy {
+  constructor(@Inject('KAFKA_SERVICE') private readonly client: ClientKafka) {}
   async onModuleInit() {
-    this.client.subscribeToResponseOf('add.new.challengeType');
-    this.client.subscribeToResponseOf('get.challengesType.list');
-    this.client.subscribeToResponseOf('getById.challengeType');
-    this.client.subscribeToResponseOf('updateById.challengeType');
-    this.client.subscribeToResponseOf('deleteById.challengeType');
+    // await kafkaPath(this.client);
+    ['add.new.challengeType', 'get.challengesType.list', 'getById.challengeType', 'updateById.challengeType', 'deleteById.challengeType'].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
 
     await this.client.connect();
+  }
+  async onModuleDestroy() {
+    await this.client.close();
   }
 
   @Post('/')
