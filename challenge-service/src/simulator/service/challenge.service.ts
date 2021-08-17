@@ -10,10 +10,11 @@ export class ChallengeService {
     @InjectModel('Challenge') private readonly challengeModel: Model<Challenge>,
   ) {}
 
-  async insertChallenge(title: string, desc: string) {
+  async insertChallenge(title: string, desc: string, reunlockable: boolean) {
     const newChallenge = new this.challengeModel({
       title,
       description: desc,
+      reunlockable
     });
     const result = await newChallenge.save();
     return result.id as string;
@@ -25,6 +26,7 @@ export class ChallengeService {
       id: prod.id,
       title: prod.title,
       description: prod.description,
+      reunlockable: prod.reunlockable,
     }));
   }
 
@@ -34,6 +36,7 @@ export class ChallengeService {
       id: challenge.id,
       title: challenge.title,
       description: challenge.description,
+      reunlockable: challenge.reunlockable
     };
   }
 
@@ -41,6 +44,7 @@ export class ChallengeService {
     challengeId: string,
     title: string,
     desc: string,
+    reunlockable: boolean
   ) {
     const updatedChallenge = await this.findChallenge(challengeId);
     if (title) {
@@ -49,13 +53,16 @@ export class ChallengeService {
     if (desc) {
       updatedChallenge.description = desc;
     }
+    if (reunlockable) {
+      updatedChallenge.reunlockable = reunlockable;
+    }
     updatedChallenge.save();
   }
 
   async deleteChallenge(prodId: string) {
     const result = await this.challengeModel.deleteOne({_id: prodId}).exec();
     if (result.n === 0) {
-      throw new NotFoundException('Could not find challenge.');
+      throw new NotFoundException('Could not find challenge (not found exception).');
     }
   }
 
@@ -64,10 +71,10 @@ export class ChallengeService {
     try {
       challenge = await this.challengeModel.findById(id).exec();
     } catch (error) {
-      throw new NotFoundException('Could not find challenge.');
+      throw new NotFoundException('Could not find challenge (not found exception) (findChallengeFunction).');
     }
     if (!challenge) {
-      throw new NotFoundException('Could not find challenge.');
+      throw new NotFoundException('Could not find challenge (not found exception) ( no challenge found).');
     }
     return challenge;
   }

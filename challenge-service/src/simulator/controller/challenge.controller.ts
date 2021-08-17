@@ -15,6 +15,7 @@ import {
       return this.challengeService.insertChallenge(
         messageKafka.value.title,
         messageKafka.value.description,
+        messageKafka.value.reunlockable,
       );
     }
   
@@ -31,8 +32,9 @@ import {
 
     @MessagePattern('updateById.challenge')
     async updateChallenge(@Payload() messageKafka: IKafkaMessage<IChallengeId>) {
-      return this.challengeService.updateChallenge(messageKafka.value.id, messageKafka.value.title, messageKafka.value.description);
+      return this.challengeService.updateChallenge(messageKafka.value.id, messageKafka.value.title, messageKafka.value.description, messageKafka.value.reunlockable);
     }
+    
     @MessagePattern('deleteById.challenge')
     async removeChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
         return this.challengeService.deleteChallenge(messageKafka.value);

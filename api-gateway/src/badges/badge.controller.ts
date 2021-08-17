@@ -1,7 +1,6 @@
 import { Delete, Patch, Put } from '@nestjs/common';
 import { Body, Controller, Get, Param, Post, Inject, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Client, ClientKafka, Transport } from '@nestjs/microservices';
-import { kafkaPath } from 'src/utils/kafkaPaths';
 import { Badge } from './interfaces/badge.interface';
 
 @Controller('badge')

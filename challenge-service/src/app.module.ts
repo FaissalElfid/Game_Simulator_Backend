@@ -8,8 +8,9 @@ import { ChallengeTypeModule } from './simulator/module/challengeType.module';
 @Module({
   imports: [
     ChallengeTypeModule,
-    ChallengeModule,
+    // ChallengeModule,
     BadgeModule,
+    ChallengeModule,
     MongooseModule.forRoot(
       'mongodb+srv://faissal:FaissalFaissal@cluster0.bhlgy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
     ),

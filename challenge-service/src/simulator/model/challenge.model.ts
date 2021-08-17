@@ -7,8 +7,8 @@ const schema = mongoose.Schema;
 export const ChallengeSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: false },
-  reunlockage: { type: Boolean, required: true },
-  challengeType: [{ type: schema.Types.ObjectId, ref: "challengeType", required: false}],
+  reunlockable: { type: Boolean, required: false },
+  challengeType: [{ type: schema.Types.ObjectId, ref: "ChallengeType", required: false}],
   bagdes: [{ type: BadgeSchema, required: false }],
   bagdeSilver: [{ type: BadgeSchema, required: false }],
   bagdeGold: [{ type: BadgeSchema, required: false }],
@@ -20,7 +20,7 @@ export interface Challenge extends mongoose.Document {
   id: string;
   title: string;
   description: string;
-  reunlockage: boolean;
+  reunlockable: boolean;
   badges: [Badge];
   bagdeSilver: [Badge];
   bagdeGold: [Badge];

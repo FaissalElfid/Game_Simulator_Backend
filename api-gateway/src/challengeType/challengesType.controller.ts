@@ -1,10 +1,10 @@
-import { Delete, Patch, Put,Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Delete, Patch, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { Client, ClientKafka } from '@nestjs/microservices';
-import { Challenge } from './interfaces/challenge.interface';
+import { ClientKafka } from '@nestjs/microservices';
+import { Challenge } from './interfaces/challengeType.interface';
 
 @Controller('challengetype')
-export class ChallengesController  implements OnModuleInit, OnModuleDestroy {
+export class ChallengeTypeController  implements OnModuleInit, OnModuleDestroy {
   constructor(@Inject('KAFKA_SERVICE') private readonly client: ClientKafka) {}
   async onModuleInit() {
     // await kafkaPath(this.client);
