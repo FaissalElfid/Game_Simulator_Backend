@@ -10,22 +10,18 @@ export class ChallengeTypeService {
     @InjectModel('ChallengeType') private readonly challengeTypeModel: Model<ChallengeType>,
   ) {}
 
-  async insertChallengeType(title: string, desc: string) {
-    const newChallengeType = new this.challengeTypeModel({
-      title,
-      description: desc,
-    });
-    const result = await newChallengeType.save();
-    return result.id as string;
+  async insertChallengeType(challengeType: ChallengeType) {
+    await new this.challengeTypeModel(challengeType).save();
+    // const newChallengeType = new this.challengeTypeModel({
+    //   title,
+    //   description: desc,
+    // });
+    // const result = await newChallengeType.save();
+    // return result.id as string;
   }
 
   async getChallengeTypes() {
-    const challenges = await this.challengeTypeModel.find().exec();
-    return challenges.map(prod => ({
-      id: prod.id,
-      title: prod.title,
-      description: prod.description,
-    }));
+    return await this.challengeTypeModel.find().populate('challenges');
   }
 
   async getSingleChallenge(challengeId: string) {
@@ -55,7 +51,7 @@ export class ChallengeTypeService {
   async deleteChallenge(prodId: string) {
     const result = await this.challengeTypeModel.deleteOne({_id: prodId}).exec();
     if (result.n === 0) {
-      throw new NotFoundException('Could not find challenge.');
+      throw new NotFoundException('Could not find challenge. (delete challenge)');
     }
   }
 
@@ -64,10 +60,11 @@ export class ChallengeTypeService {
     try {
       challenge = await this.challengeTypeModel.findById(id).exec();
     } catch (error) {
-      throw new NotFoundException('Could not find challenge.');
+      throw new NotFoundException('Could not find challenge type error!! (findchallenge()).');
     }
     if (!challenge) {
-      throw new NotFoundException('Could not find challenge.');
+      
+      throw new NotFoundException('Could not find challenge type (findchallenge()).');
     }
     return challenge;
   }

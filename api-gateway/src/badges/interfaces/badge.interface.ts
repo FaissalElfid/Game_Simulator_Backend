@@ -1,7 +1,7 @@
 export interface Badge {
-    id: string;
+  id: string;
   title: string;
   description: string;
   pronos: number;
-    level: string;
+  level: string;
 }

@@ -3,58 +3,45 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Challenge } from '../model/challenge.model';
+import { ChallengeType, ChallengeTypeI } from '../model/ChallengeType.model';
 
 @Injectable()
 export class ChallengeService {
   constructor(
     @InjectModel('Challenge') private readonly challengeModel: Model<Challenge>,
+    @InjectModel('ChallengeType') private readonly typeChallengeModel: Model<ChallengeType>
   ) {}
 
-  async insertChallenge(title: string, desc: string, reunlockable: boolean) {
-    const newChallenge = new this.challengeModel({
-      title,
-      description: desc,
-      reunlockable
-    });
-    const result = await newChallenge.save();
-    return result.id as string;
-  }
+  async insertChallenge(challenge: Challenge, challengeType: ChallengeTypeI): Promise<void> {
+    console.log(challengeType)
+    await new this.challengeModel(challenge).save().then(async (c) => {
+      let challenges = [];
+      let newChallengeType = {challenges, ...challengeType};
+      newChallengeType.challenges.push(c.id);
+      await this.typeChallengeModel.updateOne({ _id: challengeType.id}, newChallengeType);
+  })
+} 
 
   async getChallenges() {
-    const challenges = await this.challengeModel.find().exec();
-    return challenges.map(prod => ({
-      id: prod.id,
-      title: prod.title,
-      description: prod.description,
-      reunlockable: prod.reunlockable,
-    }));
+    return await this.challengeModel.find()
   }
 
   async getSingleChallenge(challengeId: string) {
-    const challenge = await this.findChallenge(challengeId);
-    return {
-      id: challenge.id,
-      title: challenge.title,
-      description: challenge.description,
-      reunlockable: challenge.reunlockable
-    };
+    return await this.challengeModel.findById(challengeId).populate('challengeType');
   }
 
   async updateChallenge(
-    challengeId: string,
-    title: string,
-    desc: string,
-    reunlockable: boolean
+    challengeId: string, challenge: Challenge
   ) {
     const updatedChallenge = await this.findChallenge(challengeId);
-    if (title) {
-      updatedChallenge.title = title;
+    if (challenge.title) {
+      updatedChallenge.title = challenge.title;
     }
-    if (desc) {
-      updatedChallenge.description = desc;
+    if (challenge.description) {
+      updatedChallenge.description = challenge.description;
     }
-    if (reunlockable) {
-      updatedChallenge.reunlockable = reunlockable;
+    if (challenge.reunlockable) {
+      updatedChallenge.reunlockable = challenge.reunlockable;
     }
     updatedChallenge.save();
   }
@@ -65,7 +52,7 @@ export class ChallengeService {
       throw new NotFoundException('Could not find challenge (not found exception).');
     }
   }
-
+ 
   private async findChallenge(id: string): Promise<Challenge> {
     let challenge;
     try {

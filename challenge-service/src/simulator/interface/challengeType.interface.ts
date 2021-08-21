@@ -8,3 +8,9 @@ export interface IChallengeId {
     title: string;
     description: string;
 }
+export interface ChallengeType{
+    id: string;
+    title: string;
+    description: string;
+    challenges: Array<string>;
+  }

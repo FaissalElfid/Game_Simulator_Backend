@@ -5,16 +5,16 @@ import {
   import {IKafkaMessage} from "../../interfaces/kafka-message.interface";
 import { IChallengeId, IChallenge } from '../interface/challengeType.interface';
   import { ChallengeTypeService } from '../service/challengeType.service';
-  
+  import { ChallengeType } from '../model/ChallengeType.model';
+
 @Controller('challengeTypes')
   export class ChallengeTypeController {
     constructor(private readonly challengeTypeService: ChallengeTypeService) {}
     @MessagePattern('add.new.challengeType')
     addChallenge(
-      @Payload() messageKafka: IKafkaMessage<IChallenge>) {
+      @Payload() messageKafka: IKafkaMessage<ChallengeType>) {
       return this.challengeTypeService.insertChallengeType(
-        messageKafka.value.title,
-        messageKafka.value.description,
+        messageKafka.value
       );
     }
   

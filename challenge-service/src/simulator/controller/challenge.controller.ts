@@ -1,42 +1,50 @@
-import {
-    Controller,
-  } from '@nestjs/common';
-  import {MessagePattern, Payload} from "@nestjs/microservices";
-  import {IKafkaMessage} from "../../interfaces/kafka-message.interface";
-  import {IChallenge, IChallengeId} from '../interface/challenge.interface';
-  import { ChallengeService } from '../service/challenge.service';
-  
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { IKafkaMessage } from '../../interfaces/kafka-message.interface';
+import { ChallengeService } from '../service/challenge.service';
+import { Challenge, ChallengeSave } from '../model/challenge.model';
+import { ChallengeTypeService } from '../service/challengeType.service';
+import { ChallengeType } from '../interface/ChallengeType.interface';
+
 @Controller('challenges')
-  export class ChallengeController {
-    constructor(private readonly challengeService: ChallengeService) {}
-    @MessagePattern('add.new.challenge')
-    addChallenge(
-      @Payload() messageKafka: IKafkaMessage<IChallenge>) {
-      return this.challengeService.insertChallenge(
-        messageKafka.value.title,
-        messageKafka.value.description,
-        messageKafka.value.reunlockable,
-      );
-    }
-  
-    @MessagePattern('get.challenges.list')
-    getAllChallenge() {
-      return this.challengeService.getChallenges();
-    }
-
-    // also add the api path on the api-gateway
-    @MessagePattern('getById.challenge')
-    getChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
-      return this.challengeService.getSingleChallenge(messageKafka.value);
-    }
-
-    @MessagePattern('updateById.challenge')
-    async updateChallenge(@Payload() messageKafka: IKafkaMessage<IChallengeId>) {
-      return this.challengeService.updateChallenge(messageKafka.value.id, messageKafka.value.title, messageKafka.value.description, messageKafka.value.reunlockable);
-    }
-    
-    @MessagePattern('deleteById.challenge')
-    async removeChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
-        return this.challengeService.deleteChallenge(messageKafka.value);
-    }
+export class ChallengeController {
+  constructor(
+    private challengeService: ChallengeService,
+    private challengeTypeService: ChallengeTypeService,
+  ) {}
+  @MessagePattern('add.new.challenge')
+  async addChallenge(@Payload() messageKafka: IKafkaMessage<ChallengeSave>) {
+    let challengeType;
+    await this.challengeTypeService
+      .getSingleChallenge(messageKafka.value.typeChallengeId)
+      .then((res: ChallengeType): ChallengeType => (challengeType = res));
+    return this.challengeService.insertChallenge(
+      messageKafka.value.challenge,
+      challengeType,
+    );
   }
+
+  @MessagePattern('get.challenges.list')
+  getAllChallenge() {
+    return this.challengeService.getChallenges();
+  }
+
+  // also add the api path on the api-gateway
+  @MessagePattern('getById.challenge')
+  getChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
+    return this.challengeService.getSingleChallenge(messageKafka.value);
+  }
+
+  @MessagePattern('updateById.challenge')
+  async updateChallenge(@Payload() messageKafka: IKafkaMessage<Challenge>) {
+    return this.challengeService.updateChallenge(
+      messageKafka.value.id,
+      messageKafka.value,
+    );
+  }
+
+  @MessagePattern('deleteById.challenge')
+  async removeChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
+    return this.challengeService.deleteChallenge(messageKafka.value);
+  }
+}
