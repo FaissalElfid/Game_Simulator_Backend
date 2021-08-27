@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose';
 const schema = mongoose.Schema;
-// normaly i should delete this from mongo db because i'm saving it on the challange schema 
 export const BadgeSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: false },
@@ -18,3 +17,4 @@ export const BadgeSchema = new mongoose.Schema({
     pronos: number;
     level: string;
   }
+  export const BadgeModel = mongoose.model('Badge', BadgeSchema);

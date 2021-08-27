@@ -1,103 +1,118 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { IBadge } from '../interface/badge.interface';
 
 import { Badge } from '../model/badge.model';
+import { Challenge } from '../model/challenge.model';
 
 @Injectable()
 export class BadgeService {
   constructor(
-    @InjectModel('Badge') private readonly challengeModel: Model<Badge>,
   ) {}
 
-  async insertBadge(title: string, desc: string, pronos: number, level: string) {
-    if(this.verifieLevel(level)){
-      const newBadge = new this.challengeModel({
-        title,
-        description: desc,
-        pronos,
-        level
-      });
-      const result = await newBadge.save();
-      return result.id as string;
-    } else{
-      // throw new NotFoundException('Could not find level.');
-      return 'level not defined in our program';
-    }
-    
-  }
-
-  async getBadges() {
-    const challenges = await this.challengeModel.find().exec();
-    return challenges.map(chal => ({
-      id: chal.id,
-      title: chal.title,
-      description: chal.description,
-      pronos: chal.pronos,
-      level: chal.level
-    }));
-  }
-
-  async getSingleBadge(challengeId: string) {
-    const challenge = await this.findBadge(challengeId);
-    return {
-      id: challenge.id,
-      title: challenge.title,
-      description: challenge.description,
-      pronos: challenge.pronos,
-      level: challenge.level
-    };
-  }
-
-  async updateBadge(
-    challengeId: string,
-    title: string,
-    desc: string,
-    pronos: number,
-    level: string
-  ) {
-    const updatedBadge = await this.findBadge(challengeId);
-
-    if (title) {
-      updatedBadge.title = title;
-    }
-    if (desc) {
-      updatedBadge.description = desc;
-    }
-    if (pronos) {
-      updatedBadge.pronos = pronos;
-    }
-    if (level && this.verifieLevel(level)) {
-      updatedBadge.level = level;
-    }
-    updatedBadge.save();
-  }
-
-  async deleteBadge(prodId: string) {
-    const result = await this.challengeModel.deleteOne({_id: prodId}).exec();
-    if (result.n === 0) {
-      throw new NotFoundException('Could not find challenge.');
+  async insertBadgeInChallenge(badge: Badge, challenge: Challenge) {
+    badge.level = badge.level.toLowerCase();
+    if (this.verifieLevel(badge.level)) {
+      challenge = this.addBadgeToChallenge(challenge, badge);
+      return await challenge.save();
+    } else {
+      return "we can't save this badge";
     }
   }
 
-  private async findBadge(id: string): Promise<Badge> {
-    let challenge;
-    try {
-      challenge = await this.challengeModel.findById(id).exec();
-    } catch (error) {
-      throw new NotFoundException('Could not find challenge.');
+  findBadge(challenge: Challenge, badgeId: string): Badge{
+    var arrayBadges = challenge.badges.concat(
+      challenge.badgeSilver,
+      challenge.badgeGold,
+    );
+    var badge = arrayBadges.find(obj => {
+      return obj.id === badgeId;
+    });
+    return badge;
+  }
+
+  async updateById(challenge: Challenge, badgeId: string, newBadge: Badge){    
+    // this is just temporary (because we don't need this function yet)
+    await this.deleteBadgeInChallenge(challenge,badgeId);
+    newBadge.id = badgeId;
+    return this.insertBadgeInChallenge(newBadge,challenge);
+  }
+
+  addBadgeToChallenge(challenge: Challenge, badge: Badge): Challenge {
+    badge.level = badge.level.toLowerCase();
+
+    console.log(
+      'this badge is saved on the challenge ' +
+        challenge.title +
+        ' on the level ' +
+        badge.level,
+    );
+    if (!challenge.reunlockable)
+      if (badge.level !== 'none') {
+        badge.level = 'none';
+        console.log(
+          'we saved this badge with level none because we have challenge lockable once',
+        );
+      }
+    if (challenge.badges.length < 7) {
+      switch (badge.level) {
+        case 'none':
+          challenge.badges.push(badge);
+          return challenge;
+        case 'bronze':
+          challenge.badges.push(badge);
+          return challenge;
+        case 'silver':
+          challenge.badgeSilver.push(badge);
+          return challenge;
+        case 'gold':
+          challenge.badgeGold.push(badge);
+          return challenge;
+      }
     }
-    if (!challenge) {
-      throw new NotFoundException('Could not find challenge.');
+  }
+  deleteFromArray(badges: [Badge], badgeId: string): [Badge]{
+    var challengesbadge = badges.filter(
+      badge => badge.id !== badgeId,
+    );
+    badges.splice(0, badges.length);
+    challengesbadge.forEach(badgeElement => {
+      badges.push(badgeElement);
+    });
+    return badges;
+  }
+
+  deleteBadgeInChallenge(challenge: Challenge, badgeId: string) {
+    if (!challenge.reunlockable) {
+      challenge.badges = this.deleteFromArray(challenge.badges, badgeId)
+      return challenge.save();
+    } else {
+      var badge = this.findBadge(challenge,badgeId);
+      badge.level = badge.level.toLowerCase();
+
+      switch (badge.level) {
+        case 'bronze':
+          challenge.badges = this.deleteFromArray(challenge.badges, badgeId)
+          return challenge.save();
+        case 'silver':
+          challenge.badges = this.deleteFromArray(challenge.badgeSilver, badgeId)
+          return challenge.save();
+        case 'gold':
+          challenge.badges = this.deleteFromArray(challenge.badgeGold, badgeId)
+          return challenge.save();
+      }
     }
-    return challenge;
   }
 
   verifieLevel(level: string) {
     const levels = ['none', 'bronze', 'silver', 'gold'];
-    if(!levels.includes(level)){
-      // throw new NotFoundException('Could not find level.');
+    if (!levels.includes(level)) {
       return false;
-    }else return true;
+    } else return true;
   }
 }

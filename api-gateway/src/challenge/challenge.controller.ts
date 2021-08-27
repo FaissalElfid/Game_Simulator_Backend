@@ -25,10 +25,10 @@ export class ChallengeController  implements OnModuleInit, OnModuleDestroy {
   getList() {
     return this.client.send('get.challenges.list', '');
   }
-  // @Get('/:id')
-  // getChallenge(@Param('id') prodId: string) {
-  //   return this.client.send('getById.challenge', prodId);
-  // }
+  @Get('/:id')
+  getChallenge(@Param('id') prodId: string) {
+    return this.client.send('getById.challenge', prodId);
+  }
   @Patch(':id')
   async updateChallenge(
     @Param('id') id: string,

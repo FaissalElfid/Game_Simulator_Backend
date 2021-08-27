@@ -12,12 +12,6 @@ export class ChallengeTypeService {
 
   async insertChallengeType(challengeType: ChallengeType) {
     await new this.challengeTypeModel(challengeType).save();
-    // const newChallengeType = new this.challengeTypeModel({
-    //   title,
-    //   description: desc,
-    // });
-    // const result = await newChallengeType.save();
-    // return result.id as string;
   }
 
   async getChallengeTypes() {
@@ -25,12 +19,7 @@ export class ChallengeTypeService {
   }
 
   async getSingleChallenge(challengeId: string) {
-    const challenge = await this.findChallenge(challengeId);
-    return {
-      id: challenge.id,
-      title: challenge.title,
-      description: challenge.description,
-    };
+    return await this.findChallenge(challengeId);
   }
 
   async updateChallenge(
@@ -58,13 +47,13 @@ export class ChallengeTypeService {
   private async findChallenge(id: string): Promise<ChallengeType> {
     let challenge;
     try {
-      challenge = await this.challengeTypeModel.findById(id).exec();
+      challenge = await this.challengeTypeModel.findById(id).populate('challenges');
     } catch (error) {
       throw new NotFoundException('Could not find challenge type error!! (findchallenge()).');
     }
     if (!challenge) {
-      
-      throw new NotFoundException('Could not find challenge type (findchallenge()).');
+      return null;
+      // throw new NotFoundException('Could not find challenge type (findchallenge()).');
     }
     return challenge;
   }

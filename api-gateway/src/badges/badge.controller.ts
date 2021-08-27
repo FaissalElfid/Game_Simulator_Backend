@@ -11,37 +11,45 @@ export class BadgesController implements OnModuleInit, OnModuleDestroy {
     await this.client.close();
   }
   async onModuleInit() {
-    // await kafkaPath(this.client);
-    ['add.new.badge', 'get.badges.list', 'getById.badge', 'updateById.badge', 'deleteById.badge'].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
+    ['add.new.badge.challenge', 'get.challenge.badges.list', 'getById.badge', 'updateById.badge', 'deleteById.badge'].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
 
     await this.client.connect();
   }
 
-  @Post('/')
-  appPost(@Body() badge: Badge) {
-    return this.client.send('add.new.badge', badge);
+  @Post('/:challengeId')
+  appPost(@Body() badge: Badge,@Param('challengeId') challengeId : string) {
+    let badgeSaveDto = {challengeId, badge}
+    return this.client.send('add.new.badge.challenge', badgeSaveDto);
   }
 
-  @Get('/')
-  getList() {
-    return this.client.send('get.badges.list', '');
+  @Get('/challenge/:challengeId')
+  getList(@Param('challengeId') challengeId : string) {
+    return this.client.send('get.challenge.badges.list', challengeId);
   }
-  @Get('/:id')
-  getBadge(@Param('id') prodId: string) {
-    return this.client.send('getById.badge', prodId);
+
+  
+  @Get('/badge/:id')
+  getBadge(@Param('id') badgeId: string) {
+    return this.client.send('getById.badge', badgeId);
   }
-  @Patch(':id')
+
+  //not created yet
+  @Patch(':idChallenge/:idBadge')
   async updateBadge(
-    @Param('id') id: string,
+    @Param('idChallenge') idChallenge: string,
+    @Param('idBadge') idBadge: string,
     @Body() badge: Badge
   ) {
-    const badgeDto = {id, ...badge};
+    const badgeDto = {idChallenge, idBadge, badge};
     return this.client.send('updateById.badge', badgeDto);
   }
-  @Delete(':id')
+
+  @Delete(':challengeId/:badgeId')
   async deleteBadge(
-    @Param('id') idBadge: string,
+    @Param('challengeId') challengeId: string,
+    @Param('badgeId') badgeId: string,
   ) {
-    return this.client.send('deleteById.badge', idBadge);
+    let badgeDeleteDto = {badgeId,challengeId};
+    return this.client.send('deleteById.badge', badgeDeleteDto);
   }
 }

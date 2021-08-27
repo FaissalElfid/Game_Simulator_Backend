@@ -20,4 +20,3 @@ export interface ChallengeTypeI{
   description: string;
   challenges: Array<string>;
 }
-// there is a problem with the challenges in challenge type

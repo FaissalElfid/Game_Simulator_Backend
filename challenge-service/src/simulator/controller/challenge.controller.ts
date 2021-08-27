@@ -18,6 +18,7 @@ export class ChallengeController {
     await this.challengeTypeService
       .getSingleChallenge(messageKafka.value.typeChallengeId)
       .then((res: ChallengeType): ChallengeType => (challengeType = res));
+    messageKafka.value.challenge.challengeType = messageKafka.value.typeChallengeId;
     return this.challengeService.insertChallenge(
       messageKafka.value.challenge,
       challengeType,
@@ -42,7 +43,7 @@ export class ChallengeController {
       messageKafka.value,
     );
   }
-
+// i should remove it also from the challenge type (model)
   @MessagePattern('deleteById.challenge')
   async removeChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
     return this.challengeService.deleteChallenge(messageKafka.value);
