@@ -23,11 +23,9 @@ import { IChallengeId, IChallenge } from '../interface/challengeType.interface';
       return this.challengeTypeService.getChallengeTypes();
     }
 
-    // also add the api path on the api-gateway
     @MessagePattern('getById.challengeType')
     getChallenge(@Payload() messageKafka: IKafkaMessage<string>) {
       return this.challengeTypeService.getSingleChallenge(messageKafka.value);
-      // return this.challengeTypeService.getSingleChallenge(messageKafka.value.id);
     }
 
     @MessagePattern('updateById.challengeType')

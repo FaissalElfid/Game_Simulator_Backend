@@ -4,7 +4,6 @@ import { ChallengeTypeController } from './challengeType/challengesType.controll
 import { ChallengeController } from './challenge/challenge.controller';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { UserController } from './user/user.controller';
 // import { UserController } from './user/user.controller';
 @Module({
   imports: [ClientsModule.register([
@@ -22,7 +21,7 @@ import { UserController } from './user/user.controller';
       },
     },
   ]),],
-  controllers: [ChallengeTypeController,BadgesController,ChallengeController,UserController],
+  controllers: [ChallengeTypeController,BadgesController,ChallengeController],
   providers: [],
 })
 export class AppModule {}

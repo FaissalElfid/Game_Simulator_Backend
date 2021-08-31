@@ -32,4 +32,3 @@ export interface Challenge extends mongoose.Document {
   badgeGold: [Badge];
 }
 
-// construc
