@@ -3,14 +3,16 @@ import { UserService } from '../service/user.service';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IKafkaMessage } from 'src/interfaces/kafka-message.interface';
-import { UserUpdate } from '../interface/user.interface';
+import { UserLoginI, UserUpdate } from '../interface/user.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly userService: UserService,
+    ) {
   }
 
-  
   @MessagePattern('get.users.list')
   async get(){
     return await this.userService.get();
@@ -39,5 +41,10 @@ export class UserController {
   @MessagePattern('register.new.user')
   async register(@Payload() messageKafka: IKafkaMessage<User>){
     await this.userService.register(messageKafka.value);
+  }
+  @MessagePattern('login.user')
+  async login(@Payload() messageKafka: IKafkaMessage<UserLoginI>){
+    const userId = await this.userService.login(messageKafka.value);
+    return userId;
   }
 }

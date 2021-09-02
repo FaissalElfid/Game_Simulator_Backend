@@ -6,7 +6,7 @@ export const UserSchema = new schema({
   name: { type: String, required: true },
   description: { type: String, required: false },
   email: { type: String, required: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   challenges: [{ type: schema.Types.ObjectId, ref: "Challenge", required: false}],
   level: { type: Number, required: true },
 });

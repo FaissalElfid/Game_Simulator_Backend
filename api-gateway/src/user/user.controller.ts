@@ -1,30 +1,81 @@
-import { Delete, Patch, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Delete,
+  Patch,
+  Inject,
+  OnModuleInit,
+  OnModuleDestroy,
+  Res,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { User } from './interfaces/user.interface';
+import { Response, Request } from 'express';
+import { User, UserLoginI } from './interfaces/user.interface';
+import { JwtService } from '@nestjs/jwt';
+import { saveIdOnCookie } from 'src/utils/methods';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('user')
-export class UserController  implements OnModuleInit, OnModuleDestroy {
-  constructor(@Inject('KAFKA_SERVICE') private readonly client: ClientKafka) {}
+export class UserController implements OnModuleInit, OnModuleDestroy {
+  constructor(
+    @Inject('KAFKA_SERVICE') private readonly client: ClientKafka,
+    private jwtService: JwtService,
+  ) {}
   async onModuleInit() {
-    ['add.new.user', 'get.users.list','register.new.user', 'getById.user', 'updateById.user', 'deleteById.user'].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
+    [
+      'add.new.user',
+      'get.users.list',
+      'register.new.user',
+      'getById.user',
+      'updateById.user',
+      'deleteById.user',
+      'login.user',
+    ].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
 
     await this.client.connect();
   }
   async onModuleDestroy() {
     await this.client.close();
   }
-
-  @Post('/add')
-  addUser(@Body() user: User) {
-    return this.client.send('add.new.user', user);
-  }
-
+  // register
   @Post('/')
   register(@Body() user: User) {
     return this.client.send('register.new.user', user);
   }
 
+  @Post('/login/')
+  async login(
+    @Body() userDto: UserLoginI,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const userId = await firstValueFrom(this.client.send('login.user', userDto))
+    return await saveIdOnCookie(userId, response, this.jwtService)
+  }
+
+  @Get('/cookie')
+  async user(@Req() request: Request) {
+    try {
+      var cookie = request.cookies['jwt'];
+      var data = await this.jwtService.verifyAsync(cookie);
+      if (!data) {
+        throw new UnauthorizedException();
+      }
+      return await this.getUser(data.id);
+    } catch (e) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt');
+    return {
+      message: 'success',
+    };
+  }
+
+  // crud
   @Get('/')
   getList() {
     return this.client.send('get.users.list', '');
@@ -33,18 +84,17 @@ export class UserController  implements OnModuleInit, OnModuleDestroy {
   getUser(@Param('id') userId: string) {
     return this.client.send('getById.user', userId);
   }
+  @Post('/add')
+  addUser(@Body() user: User) {
+    return this.client.send('add.new.user', user);
+  }
   @Patch(':id')
-  async updateUser(
-    @Param('id') id: string,
-    @Body() user: User
-  ) {
-    const userDto = {id, user};
+  async updateUser(@Param('id') id: string, @Body() user: User) {
+    const userDto = { id, user };
     return this.client.send('updateById.user', userDto);
   }
   @Delete(':id')
-  async deleteUser(
-    @Param('id') idUser: string,
-  ) {
+  async deleteUser(@Param('id') idUser: string) {
     return this.client.send('deleteById.user', idUser);
   }
 }
