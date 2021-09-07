@@ -44,7 +44,6 @@ export class UserController {
   }
   @MessagePattern('login.user')
   async login(@Payload() messageKafka: IKafkaMessage<UserLoginI>){
-    const userId = await this.userService.login(messageKafka.value);
-    return userId;
+    return this.userService.login(messageKafka.value);
   }
 }

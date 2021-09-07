@@ -6,9 +6,20 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UserController } from './user/user.controller';
-
+import { UserService } from './user/user.service';
+import { LocalStrategy } from './utils/strategies/local.strategy';
+import { JwtStrategy } from './utils/strategies/jwt.strategy';
+import { RefreshStrategy } from './utils/strategies/refresh.strategy';
+import { PassportModule } from '@nestjs/passport';
 @Module({
-  imports: [ClientsModule.register([
+  imports: [
+    JwtModule.register({
+      secret: 'My random secret key never let others',
+      signOptions: {
+        expiresIn: 30,
+      },
+    }),
+    ClientsModule.register([
     {
       name: 'KAFKA_SERVICE',
       transport: Transport.KAFKA,
@@ -22,13 +33,10 @@ import { UserController } from './user/user.controller';
         },
       },
     },
-  ]),
-  JwtModule.register({
-    secret: 'faissalfaissalfaissal',
-    signOptions: {expiresIn: '1d'}
-  })
+  ]),PassportModule
 ],
   controllers: [ChallengeTypeController,BadgesController,ChallengeController,UserController],
-  providers: [],
+  providers: [UserService,LocalStrategy, JwtStrategy, RefreshStrategy],
+  exports: [],
 })
 export class AppModule {}

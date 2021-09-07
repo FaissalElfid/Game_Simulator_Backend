@@ -7,6 +7,7 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
@@ -15,6 +16,7 @@ import { User, UserLoginI } from './interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { saveIdOnCookie } from 'src/utils/methods';
 import { firstValueFrom } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController implements OnModuleInit, OnModuleDestroy {
@@ -45,6 +47,7 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
   }
 
   @Post('/login/')
+  @UseGuards(AuthGuard('local'))
   async login(
     @Body() userDto: UserLoginI,
     @Res({ passthrough: true }) response: Response,
@@ -65,11 +68,12 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
     } catch (e) {
       throw new UnauthorizedException();
     }
-  }
+  } 
 
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt');
+    response.clearCookie('auth-cookie');
     return {
       message: 'success',
     };
@@ -77,7 +81,8 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
 
   // crud
   @Get('/')
-  getList() {
+  @UseGuards(AuthGuard('jwt'))
+  getList(@Req() req) {
     return this.client.send('get.users.list', '');
   }
   @Get('/:id')
