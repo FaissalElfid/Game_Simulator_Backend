@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start:dev",
+			"path": "api-gateway/",
+			"problemMatcher": [],
+			"label": "npm: start:dev - api-gateway",
+			"detail": "nest start --watch"
+		},
+		{
+			"type": "npm",
+			"script": "start:dev",
+			"path": "users-services/",
+			"problemMatcher": [],
+			"label": "npm: start:dev - users-services",
+			"detail": "nest start --watch"
+		},
+		{
+			"type": "npm",
+			"script": "start:dev",
+			"path": "challenge-service/",
+			"problemMatcher": [],
+			"label": "npm: start:dev - challenge-service",
+			"detail": "nest start --watch"
+		}
+	]
+}

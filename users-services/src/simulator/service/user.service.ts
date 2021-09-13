@@ -6,48 +6,55 @@ import * as bcrypt from 'bcrypt';
 import { UserLoginI } from '../interface/user.interface';
 import * as randomToken from 'rand-token';
 import * as moment from 'moment';
+import { firstLetterCapital } from '../utils/methods';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private readonly user: Model<User>) {}
 
 
-  public async getRefreshToken(userId: number): Promise<string> {
-    let user = await this.getById(userId);
-    user.refreshToken = randomToken.generate(16);
-    user.refreshTokenExp = moment().minutes(5).format('YYYY/MM/DD'); 
-    user.save();
-    return user.refreshTokenExp;
-  }
+  // public async getRefreshToken(userId: number): Promise<string> {
+  //   let user = await this.getById(userId);
+  //   user.refreshToken = randomToken.generate(16);
+  //   user.refreshTokenExp = moment().minutes(5).format('YYYY/MM/DD'); 
+  //   user.save();
+  //   return user.refreshTokenExp;
+  // }
 
   async get(): Promise<Array<User>> {
     return await this.user.find();
   }
 
-  async getById(id: string | number) {
-    const user =  await this.user.findById(id);
-    return user;
+  async getById(id: string | number){
+    let user = await this.user.findOne({ _id: id });
+    let {name, email,level,description, challenges, isAdmin} = user;
+    return {id, name, email,level,description, challenges, isAdmin};
   }
 
-  async save(user: User): Promise<void> {
-    await new this.user(user).save();
+  async save(user: User) {
+    try{
+      return await (await new this.user(user).save()).id;
+    }catch(err){
+      return {statusCode:"404", message:"Sorry !! We can\'t register this user for the moment."};
+    }
   }
   
   async update(user: User, id: string | number): Promise<void> {
     await this.user.updateOne({ _id: id }, user);
   }
 
-  async delete(id: string | number): Promise<void> {
-    await this.user.deleteOne({ _id: id });
+  async delete(id: string | number): Promise<any> {
+    return await (await this.user.deleteOne({ _id: id })).ok;
   }
 
-  async register(user: User): Promise<void> {
+  async register(user: User): Promise<string|any> {
     user.password =  await bcrypt.hash(user.password, 12);
+    user.name = firstLetterCapital(user.name)
     return this.save(user);
   }
   async login(userLogin: UserLoginI){
     const user = await this.user.findOne({email: userLogin.email}).select('+password').exec();
-
+    
     if(!user){
       return null;
     }

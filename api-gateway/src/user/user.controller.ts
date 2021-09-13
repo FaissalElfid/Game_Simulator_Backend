@@ -64,7 +64,10 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
       if (!data) {
         throw new UnauthorizedException();
       }
-      return await this.getUser(data.id);
+      var user =  await this.getUser(data.id);
+
+
+      return user;
     } catch (e) {
       throw new UnauthorizedException();
     }
@@ -73,7 +76,6 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt');
-    response.clearCookie('auth-cookie');
     return {
       message: 'success',
     };

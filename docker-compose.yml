@@ -25,14 +25,31 @@ services:
     ports:
       - "9092:9092"
     environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181"
+      KAFKA_LISTENERS: LISTENER_DOCKER_INTERNAL://:19092,LISTENER_DOCKER_EXTERNAL://:9092
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_BROKER_ID: 1
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - ./full-stack/kafka1/data:/var/lib/kafka/data
     depends_on:
       - zoo1
+
+  # api_gateway:
+  #     # command: sh -c "dockerize -wait tcp://zoo1:2181 -wait tcp://kafka1:9092 npm run start:dev"
+  #   container_name: api_gateway
+  #   build: ./api-gateway
+  #   restart: on-failure
+  #   environment:
+  #     - KAFKA_BROKERCONNECT=kafka:19092
+  #   ports:
+  #     - 3030:3030
+  #   command: npm run start:dev
+  #   depends_on:
+  #     - kafka1
+  #     - zoo1
+  #   links: 
+  #     - kafka1

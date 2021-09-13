@@ -40,7 +40,12 @@ export class UserController {
 
   @MessagePattern('register.new.user')
   async register(@Payload() messageKafka: IKafkaMessage<User>){
-    await this.userService.register(messageKafka.value);
+    try {
+      return await this.userService.register(messageKafka.value);
+    } catch (error) {
+      return error;
+    }
+    
   }
   @MessagePattern('login.user')
   async login(@Payload() messageKafka: IKafkaMessage<UserLoginI>){
