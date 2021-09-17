@@ -27,8 +27,8 @@ export class UserService {
 
   async getById(id: string | number){
     let user = await this.user.findOne({ _id: id });
-    let {name, email,level,description, challenges, isAdmin} = user;
-    return {id, name, email,level,description, challenges, isAdmin};
+    let {name, email,level,description, challenges, isAdmin, profileImage, lastName, phoneNumber} = user;
+    return {id, name, email,level,description, challenges, isAdmin, profileImage, lastName, phoneNumber};
   }
 
   async save(user: User) {
@@ -39,8 +39,30 @@ export class UserService {
     }
   }
   
-  async update(user: User, id: string | number): Promise<void> {
-    await this.user.updateOne({ _id: id }, user);
+  async update(user: User, id: string | number): Promise<any> {
+    try{
+      await this.user.updateOne({ _id: id }, user);
+    return {
+      message: 'Your profile is updated succefully !!'
+    }
+    }catch(err){
+      return err;
+    }
+    
+  }
+
+
+  async updatePassword(id: string, password: string): Promise<any> {
+    try{
+      const newPassword = await bcrypt.hash(password, 12);
+      await this.user.updateOne({ _id: id }, {password: newPassword});
+    return {
+      message: 'Your password is updated succefully !!'
+    }
+    }catch(err){
+      return err;
+    }
+    
   }
 
   async delete(id: string | number): Promise<any> {
@@ -61,6 +83,6 @@ export class UserService {
     if(!await bcrypt.compare(userLogin.password, user.password)){
       return null;
     }
-    return user.id;
+    return {id: user.id,isAdmin: user.isAdmin};
   }
 }

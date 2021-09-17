@@ -8,3 +8,7 @@ export interface UserUpdate{
     email: string;
     password: User;
  }
+ export interface UserUpdatePassword{
+   id: string;
+   password: string;
+}

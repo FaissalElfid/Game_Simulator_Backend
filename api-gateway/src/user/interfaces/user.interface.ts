@@ -1,16 +1,17 @@
 export interface User{
     id: string;
-    title: string;
+    name: string;
     description: string;
     email: string;
     level : number;
     password: string;
     role: string;
+    profileImage: string;
     challenges: Array<string>;
   }
   export interface CurrentUser{
     id: string;
-    title: string;
+    name: string;
     description: string;
     email: string;
     level : number;
@@ -20,4 +21,8 @@ export interface User{
   export interface UserLoginI{
     password: string;
     email: string;
+  }
+  export interface UserUpdatePassword{
+    password: string;
+    id: string;
   }
