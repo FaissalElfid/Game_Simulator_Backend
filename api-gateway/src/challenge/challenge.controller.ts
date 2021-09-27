@@ -16,7 +16,7 @@ export class ChallengeController  implements OnModuleInit, OnModuleDestroy {
   }
 
   @Post('/:idType')
-  appPost(@Body() challenge: Challenge, @Param('idType') typeChallengeId: string) {
+  addChallenge(@Body() challenge: Challenge, @Param('idType') typeChallengeId: string) {
     const challengeDto = {typeChallengeId, challenge};
     return this.client.send('add.new.challenge', challengeDto);
   }

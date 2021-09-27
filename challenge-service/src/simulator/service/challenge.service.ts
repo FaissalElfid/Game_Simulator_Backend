@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -17,54 +21,63 @@ export class ChallengeService {
     challenge: Challenge,
     challengeType: ChallengeTypeI,
   ): Promise<void> {
-    if(challenge.reunlockable){
+    var result;
+    if (challenge.reunlockable) {
       await new this.challengeModel(challenge).save().then(async c => {
-         await this.addChallengeToChallengeType(c,challengeType);
-       });
-      }
-      else{
-        // let challengeReunlock= ChallengeNotReunlockable(challenge.title, challenge.description, challenge.reunlockable, challenge.challengeType,challenge.badgesBronze);
-        ChallengeSchema.set('badgeSilver', undefined, {strict: false} );
-        await new this.challengeModel(challenge).save().then(async c => {
-        await this.addChallengeToChallengeType(c,challengeType);
-      })
-  }
-    
-  }
-
-  async addChallengeToChallengeType(challenge: Challenge, challengeType: ChallengeTypeI){
-    if (challengeType.challenges !== undefined) {
-      console.log("the challenge type length : " + challengeType.challenges.length)
-
-      challengeType.challenges.push(challenge.id);
-      await this.typeChallengeModel.updateOne(
-        { _id: challengeType.id },
-        challengeType,
-      );
+        result = await this.addChallengeToChallengeType(c, challengeType);
+      });
     } else {
-      let challenges = [];
-      let newChallengeType = { challenges, ...challengeType };
-      newChallengeType.challenges.push(challenge.id);
-      await this.typeChallengeModel.updateOne(
-        { _id: challengeType.id },
-        newChallengeType,
-      );
+      ChallengeSchema.set('badgeSilver', undefined, { strict: false });
+      await new this.challengeModel(challenge).save().then(async c => {
+        result = await this.addChallengeToChallengeType(c, challengeType);
+      });
+    }
+    return await result;
+  }
+
+  async addChallengeToChallengeType(
+    challenge: Challenge,
+    challengeType: ChallengeTypeI,
+  ) {
+    try {
+      if (challengeType.challenges !== undefined) {
+        console.log(
+          'the challenge length : ' + challengeType.challenges.length,
+        );
+
+        challengeType.challenges.push(challenge.id);
+        await this.typeChallengeModel.updateOne(
+          { _id: challengeType.id },
+          challengeType,
+        );
+      } else {
+        let challenges = [];
+        let newChallengeType = { challenges, ...challengeType };
+        newChallengeType.challenges.push(challenge.id);
+        await this.typeChallengeModel.updateOne(
+          { _id: challengeType.id },
+          newChallengeType,
+        );
+      }
+      return {
+        id: challengeType.id,
+        message: 'this challenge added succefully',
+      };
+    } catch (err) {
+      return err;
     }
   }
 
   async getChallenges() {
-    return await this.challengeModel.find();
+    return await this.challengeModel.find().populate('challengeType','title');
   }
 
   async getSingleChallenge(challengeId: string) {
     try {
-      return await this.challengeModel
-      .findById(challengeId)
-      .exec();
+      return await this.challengeModel.findById(challengeId).exec();
     } catch (error) {
       throw new NotFoundException();
     }
-    
   }
 
   async updateChallenge(challengeId: string, challenge: Challenge) {
@@ -84,7 +97,9 @@ export class ChallengeService {
   async deleteChallenge(prodId: string) {
     const result = await this.challengeModel.deleteOne({ _id: prodId }).exec();
     if (result.n === 0) {
-      throw new BadRequestException('Could not find challenge (not found exception).');
+      throw new BadRequestException(
+        'Could not find challenge (not found exception).',
+      );
     }
   }
 
@@ -93,10 +108,14 @@ export class ChallengeService {
     try {
       challenge = await this.challengeModel.findById(id).exec();
     } catch (error) {
-      throw new BadRequestException('Could not find challenge (not found exception) (findChallengeFunction).');
+      throw new BadRequestException(
+        'Could not find challenge (not found exception) (findChallengeFunction).',
+      );
     }
     if (!challenge) {
-      throw new BadRequestException('Could not find challenge (not found exception) ( no challenge found).');
+      throw new BadRequestException(
+        'Could not find challenge (not found exception) ( no challenge found).',
+      );
     }
     return challenge;
   }

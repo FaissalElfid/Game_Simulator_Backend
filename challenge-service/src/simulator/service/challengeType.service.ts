@@ -11,7 +11,13 @@ export class ChallengeTypeService {
   ) {}
 
   async insertChallengeType(challengeType: ChallengeType) {
-    await new this.challengeTypeModel(challengeType).save();
+    if(!await this.challengeTypeModel.exists({title: challengeType.title})){
+      const id = await (await new this.challengeTypeModel(challengeType).save()).id;
+      return {id: id, message: "this challenge type added succefully"}
+    }else{
+      return {type:"error", message: "this challenge type already exist"}
+    }
+    
   }
 
   async getChallengeTypes() {

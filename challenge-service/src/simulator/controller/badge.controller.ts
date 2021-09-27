@@ -17,6 +17,7 @@ export class BadgeController {
   @MessagePattern('add.new.badge.challenge')
   async addBadge(@Payload() messageKafka: IKafkaMessage<BadgeSaveI>) {
     let challenge;
+    console.log(messageKafka.value.badge)
     await this.challengeService
       .getSingleChallenge(messageKafka.value.challengeId)
       .then((res: Challenge): Challenge => (challenge = res));
@@ -25,7 +26,6 @@ export class BadgeController {
       challenge,
     );
   }
-
   // here i get all the challenge badges
   @MessagePattern('get.challenge.badges.list')
   async getAllChallengeBadges(@Payload() messageKafka: IKafkaMessage<string>) {
@@ -36,6 +36,7 @@ export class BadgeController {
       let badges;
     if(challenge.reunlockable) badges = {badges_bronze: challenge.badges, badges_gold: challenge.badgeGold, badges_silver: challenge.badgeSilver}
     else badges = {badges: challenge.badges};
+    badges.challengeId = messageKafka.value;
     return badges;
   }
 

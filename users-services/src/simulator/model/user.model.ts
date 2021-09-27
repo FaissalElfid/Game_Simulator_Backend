@@ -1,7 +1,14 @@
 import * as mongoose from 'mongoose';
 
 const schema = mongoose.Schema;
-
+export const BadgeUnlockedSchema = new mongoose.Schema({
+  badge: {
+    type: schema.Types.ObjectId,
+    required: false,
+  },
+  counter: { type: Number, required: false},
+  progress: { type: Number, required: false},
+})
 export const UserSchema = new schema({
   name: { type: String, required: true },
   lastName: { type: String, required: false, default:"" },
@@ -13,7 +20,7 @@ export const UserSchema = new schema({
   refreshToken: { type: String, required: false, select: false  },
   refreshTokenExp: { type: String, required: false, select: false  },
   password: { type: String, required: true, select: false },
-  challenges: [{ type: schema.Types.ObjectId, ref: "Challenge", required: false}],
+  badgesUnlocked: [{ type: BadgeUnlockedSchema, required: false}],
   level: { type: Number, required: false, default:1 },
 });
 
@@ -30,8 +37,15 @@ export interface User extends mongoose.Document {
   email: string,
   refreshToken: string,
   refreshTokenExp: string,
-  challenges: Array<string>;
+  badgesUnlocked: Array<BadgeUnlocked>;
 }
+
+export interface BadgeUnlocked{
+badge: string,
+counter: number,
+progress: number,
+}
+
 export interface User{
   id: string;
   name: string;
@@ -45,5 +59,5 @@ export interface User{
   level : number,
   password: string;
   email: string,
-  challenges: Array<string>;
+  badgesUnlocked: Array<BadgeUnlocked>;
 }

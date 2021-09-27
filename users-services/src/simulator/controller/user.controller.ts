@@ -3,7 +3,7 @@ import { UserService } from '../service/user.service';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IKafkaMessage } from 'src/interfaces/kafka-message.interface';
-import { UserLoginI, UserUpdate, UserUpdatePassword } from '../interface/user.interface';
+import { UserLoginI, UserUpdate, UserUpdateBadgeCounter, UserUpdatePassword } from '../interface/user.interface';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
@@ -57,5 +57,11 @@ export class UserController {
   @MessagePattern('login.user')
   async login(@Payload() messageKafka: IKafkaMessage<UserLoginI>) {
     return this.userService.login(messageKafka.value);
+  }
+
+  @MessagePattern('update.user.badge.counter')
+  async updateCounter(@Payload() messageKafka: IKafkaMessage<UserUpdateBadgeCounter>) {
+    console.log("controller :" + messageKafka.value.counter)
+    return this.userService.updateBadgeCounter(messageKafka.value.id, messageKafka.value.badgeId, messageKafka.value.counter);
   }
 }

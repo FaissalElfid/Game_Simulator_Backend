@@ -26,3 +26,6 @@ export interface User{
     password: string;
     id: string;
   }
+  export interface UpdateCounter{
+    counter: number
+  }

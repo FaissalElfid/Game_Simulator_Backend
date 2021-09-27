@@ -9,8 +9,9 @@ import { ChallengeModule } from './simulator/module/challenge.module';
       'mongodb+srv://faissal:FaissalFaissal@cluster0.bhlgy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
     ),
     ChallengeModule,
-  ],
+  ], 
   controllers: [],
   providers: [],
 })
+
 export class AppModule {}

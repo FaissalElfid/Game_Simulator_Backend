@@ -12,3 +12,8 @@ export interface UserUpdate{
    id: string;
    password: string;
 }
+export interface UserUpdateBadgeCounter{
+   id: string;
+   badgeId: string;
+   counter: number;
+}
