@@ -6,7 +6,7 @@ The objective of this project is to achieve a treatment of the challenges of a v
 The game is a system of sports predictions. Each week Internet users participate in a league of sports predictions to try to win prizes and unlock challenges. Internet users can predict matches using their credits.
 The game contains a pane named Badge. Badges are challenges to be completed on the application (for example: bet on 10 predictions). The badges are distributed in grids always containing 9 badges...
 
-You can find the hole project specifications on `project_subject\Sujet_Challenge.docx`
+You can find the hole project specifications on `project_subject\Sujet_Challenge.pdf`
 ## Docker
 
 If you want to just run the webapp without any setup:
