@@ -11,15 +11,6 @@ import { firstLetterCapital } from '../utils/methods';
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private readonly user: Model<User>) {}
-
-  // public async getRefreshToken(userId: number): Promise<string> {
-  //   let user = await this.getById(userId);
-  //   user.refreshToken = randomToken.generate(16);
-  //   user.refreshTokenExp = moment().minutes(5).format('YYYY/MM/DD');
-  //   user.save();
-  //   return user.refreshTokenExp;
-  // }
-
   async get(): Promise<Array<User>> {
     return await this.user.find();
   }
@@ -36,6 +27,7 @@ export class UserService {
       profileImage,
       lastName,
       phoneNumber,
+      challengeProgress,
     } = user;
     return {
       id,
@@ -48,6 +40,7 @@ export class UserService {
       profileImage,
       lastName,
       phoneNumber,
+      challengeProgress,
     };
   }
 
@@ -81,8 +74,6 @@ export class UserService {
     counter: number,
   ): Promise<any> {
     try {
-      console.log("service :" + counter)
-
       let user: User = await (
         await this.user.findOne({ _id: id })
       ).execPopulate();
@@ -90,23 +81,60 @@ export class UserService {
         user.badgesUnlocked.forEach((element, index) => {  
           let found = false;
           if (element.badge.toString()  === badgeId) {
-            console.log("found")
             element.counter = counter;
             found = true;
           }else if(index === user.badgesUnlocked.length -1 && !found){
-            console.log(" not found")
-            user.badgesUnlocked.push({counter: counter, badge: badgeId, progress: undefined})
+            user.badgesUnlocked.push({counter: counter, badge: badgeId})
           }
         });
       } else {
-        console.log("array not found")
-        user.badgesUnlocked.push({counter: counter, badge: badgeId, progress: undefined})
+        user.badgesUnlocked.push({counter: counter, badge: badgeId})
       }
       
       console.log(user, counter)
       await user.save();
       return {
         message: 'Your badge counter is updated succefully !!',
+      };
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async updateChallengeProgress(
+    userId: string,
+    challengeId: string,
+    progress: number,
+  ): Promise<any> {
+    try {
+      if(!this.user.exists({_id: userId}))throw new Error("user not found");
+      
+      console.log("service :" + progress)
+
+      let user: User = await (
+        await this.user.findOne({ _id: userId })
+      ).execPopulate();
+      if (user.challengeProgress.length > 0) {
+        user.challengeProgress.forEach((element, index) => {  
+          let found = false;
+          if (element.challenge.toString()  === challengeId) {
+            console.log("found")
+            element.progress = progress;
+            found = true;
+          }else if(index === user.badgesUnlocked.length -1 && !found){
+            console.log(" not found")
+            user.challengeProgress.push({challenge: challengeId, progress: progress})
+          }
+        });
+      } else {
+        console.log("array not found")
+        user.challengeProgress.push({challenge: challengeId, progress: progress})
+      }
+      
+      console.log(user, progress)
+      await user.save();
+      return {
+        message: 'Your challenge progress is updated succefully !!',
       };
     } catch (err) {
       return err;

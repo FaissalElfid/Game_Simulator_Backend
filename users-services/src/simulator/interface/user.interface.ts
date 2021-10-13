@@ -17,3 +17,8 @@ export interface UserUpdateBadgeCounter{
    badgeId: string;
    counter: number;
 }
+export interface UserUpdateChallengeProgress{
+   idUser: string;
+   challenge: string;
+   progress: number;
+}

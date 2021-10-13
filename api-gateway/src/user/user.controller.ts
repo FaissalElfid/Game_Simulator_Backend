@@ -15,7 +15,7 @@ import {
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { Response, Request } from 'express';
-import { UpdateCounter, User, UserLoginI, UserUpdatePassword } from './interfaces/user.interface';
+import { UpdateCounter, UpdateProgress, User, UserLoginI, UserUpdatePassword } from './interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { saveIdOnCookie } from 'src/utils/methods';
 import { firstValueFrom, map, Observable, of, tap } from 'rxjs';
@@ -57,7 +57,8 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
       'deleteById.user',
       'login.user',
       'update.user.password',
-      'update.user.badge.counter' 
+      'update.user.badge.counter',
+      'update.user.challenge.progress',
     ].forEach((key) => this.client.subscribeToResponseOf(`${key}`));
 
     await this.client.connect();
@@ -66,12 +67,19 @@ export class UserController implements OnModuleInit, OnModuleDestroy {
     await this.client.close();
   }
   // register
-  @Post('/:userid/:badgeid')
+  @Post('badge/:userid/:badgeid')
   updateUserBadge(@Param('userid') id: string,@Param('badgeid') badgeId: string,@Body() counterObj: UpdateCounter) {
     const counter = counterObj.counter
     const userUpdateCounterDto = {id,badgeId,counter}
     console.log(userUpdateCounterDto)
     return this.client.send('update.user.badge.counter', userUpdateCounterDto);
+  }
+  @Post('challenge/:userid/:challengeId')
+  updateUserChallengeProgress(@Param('userid') id: string,@Param('challengeId') challengeId: string,@Body() progressObj: UpdateProgress) {
+    const progress = progressObj.progress
+    const userUpdateProgressDto = {idUser: id,challenge: challengeId,progress: progress}
+    console.log(userUpdateProgressDto)
+    return this.client.send('update.user.challenge.progress', userUpdateProgressDto);
   }
   
   @Post('/')

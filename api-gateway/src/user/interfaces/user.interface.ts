@@ -29,3 +29,6 @@ export interface User{
   export interface UpdateCounter{
     counter: number
   }
+  export interface UpdateProgress{
+    progress: number
+  }

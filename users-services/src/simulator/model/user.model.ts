@@ -7,6 +7,12 @@ export const BadgeUnlockedSchema = new mongoose.Schema({
     required: false,
   },
   counter: { type: Number, required: false},
+});
+export const ChallengeProgresSchema = new mongoose.Schema({
+  challenge: {
+    type: schema.Types.ObjectId,
+    required: false,
+  },
   progress: { type: Number, required: false},
 })
 export const UserSchema = new schema({
@@ -21,6 +27,7 @@ export const UserSchema = new schema({
   refreshTokenExp: { type: String, required: false, select: false  },
   password: { type: String, required: true, select: false },
   badgesUnlocked: [{ type: BadgeUnlockedSchema, required: false}],
+  challengeProgress: [{ type: ChallengeProgresSchema, required: false}],
   level: { type: Number, required: false, default:1 },
 });
 
@@ -38,13 +45,17 @@ export interface User extends mongoose.Document {
   refreshToken: string,
   refreshTokenExp: string,
   badgesUnlocked: Array<BadgeUnlocked>;
+  challengeProgress: Array<ChallengeProgress>;
 }
 
 export interface BadgeUnlocked{
 badge: string,
 counter: number,
-progress: number,
 }
+export interface ChallengeProgress{
+  challenge: string,
+  progress: number,
+  }
 
 export interface User{
   id: string;
@@ -60,4 +71,5 @@ export interface User{
   password: string;
   email: string,
   badgesUnlocked: Array<BadgeUnlocked>;
+  challengeProgress: Array<ChallengeProgress>;
 }

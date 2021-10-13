@@ -13,5 +13,4 @@ import { ChallengeModule } from './simulator/module/challenge.module';
   controllers: [],
   providers: [],
 })
-
 export class AppModule {}
